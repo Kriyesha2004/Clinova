@@ -14,6 +14,7 @@ import {
   Bell,
   Users,
 } from "lucide-react";
+import Login from './Login';
 
 const LOGO_PLACEHOLDER = null;
 
@@ -154,11 +155,9 @@ function StatCounter({
 ========================= */
 
 export default function App() {
-  const [menuOpen, setMenuOpen] =
-    useState<boolean>(false);
-
-  const [scrolled, setScrolled] =
-    useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'home' | 'login'>('home');
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
 
   const [formState, setFormState] = useState({
     name: "",
@@ -166,8 +165,7 @@ export default function App() {
     message: "",
   });
 
-  const [submitted, setSubmitted] =
-    useState<boolean>(false);
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
     const handler = () =>
@@ -187,7 +185,6 @@ export default function App() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
-
     setSubmitted(true);
 
     setTimeout(() => {
@@ -208,7 +205,13 @@ export default function App() {
     "Contact",
   ];
 
- 
+  /* =========================
+     CONDITIONAL ROUTING VIEW
+  ========================= */
+  if (currentView === 'login') {
+    return <Login onBackToHome={() => setCurrentView('home')} />;
+  }
+
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: "#040d1a", color: "#e2e8f0", overflowX: "hidden", position: "relative" }}>
 
@@ -369,7 +372,11 @@ export default function App() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <button className="btn-primary" style={{ padding: "0.6rem 1.4rem", fontSize: "0.88rem" }}>
+          <button
+            className="btn-primary"
+            style={{ padding: "0.6rem 1.4rem", fontSize: "0.88rem" }}
+            onClick={() => setCurrentView('login')}
+          >
             Login <ArrowRight size={14} />
           </button>
           <button className="hamburger" onClick={() => setMenuOpen(true)}
@@ -393,7 +400,7 @@ export default function App() {
           <a key={l} href={`#${l.toLowerCase()}`} className="nav-link" onClick={() => setMenuOpen(false)}
             style={{ fontSize: "1.1rem", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>{l}</a>
         ))}
-        <button className="btn-primary" style={{ marginTop: "auto", justifyContent: "center" }}>
+        <button className="btn-primary" style={{ marginTop: "auto", justifyContent: "center" }} onClick={() => { setMenuOpen(false); setCurrentView('login'); }}>
           Login <ArrowRight size={14} />
         </button>
       </div>
@@ -441,7 +448,6 @@ export default function App() {
           {/* Right — visual panel */}
           <div style={{ animation: "floatUp 0.9s 0.2s ease both" }}>
             <div className="glass-card" style={{ padding: "2rem", position: "relative", overflow: "hidden" }}>
-              {/* Fake chart/dashboard visual */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
                 <div>
                   <div style={{ fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.06em", textTransform: "uppercase" }}>Risk Index — Colombo District</div>
