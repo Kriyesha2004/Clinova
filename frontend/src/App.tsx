@@ -1,313 +1,707 @@
-//import React from "react";
-import { ShieldCheck, Phone, Info, FileWarning } from "lucide-react";
-import logo from "./assets/logo.png";
-import "./App.css";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ShieldCheck,
+  Phone,
+  FileWarning,
+  Info,
+  ArrowRight,
+  MapPin,
+  Mail,
+  Menu,
+  X,
+  ChevronDown,
+  Activity,
+  Bell,
+  Users,
+} from "lucide-react";
 
-function App() {
+const LOGO_PLACEHOLDER = null;
+
+/* =========================
+   SCROLL REVEAL HOOK
+========================= */
+
+function useScrollReveal(): [
+  React.RefObject<HTMLDivElement | null>,
+  boolean
+] {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+        }
+      },
+      { threshold: 0.12 }
+    );
+
+    if (ref.current) {
+      obs.observe(ref.current);
+    }
+
+    return () => obs.disconnect();
+  }, []);
+
+  return [ref, visible];
+}
+
+/* =========================
+   REVEAL SECTION
+========================= */
+
+type RevealSectionProps = {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+};
+
+function RevealSection({
+  children,
+  className = "",
+  delay = 0,
+}: RevealSectionProps) {
+  const [ref, visible] = useScrollReveal();
+
   return (
-    <div className="w-full font-sans bg-slate-950 text-white overflow-x-hidden">
-      
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? "translateY(0)"
+          : "translateY(32px)",
+        transition: `opacity 0.75s ease ${delay}ms, transform 0.75s ease ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* =========================
+   STAT COUNTER
+========================= */
+
+type StatCounterProps = {
+  end: number;
+  suffix?: string;
+  label: string;
+};
+
+function StatCounter({
+  end,
+  suffix = "",
+  label,
+}: StatCounterProps) {
+  const [count, setCount] = useState<number>(0);
+  const [ref, visible] = useScrollReveal();
+
+  useEffect(() => {
+    if (!visible) return;
+
+    let start = 0;
+    const duration = 1800;
+    const step = Math.ceil(end / (duration / 16));
+
+    const timer = setInterval(() => {
+      start = Math.min(start + step, end);
+      setCount(start);
+
+      if (start >= end) {
+        clearInterval(timer);
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, [visible, end]);
+
+  return (
+    <div ref={ref} style={{ textAlign: "center" }}>
+      <div
+        style={{
+          fontSize: "clamp(2rem, 5vw, 3.5rem)",
+          fontWeight: 700,
+          fontFamily: "'Syne', sans-serif",
+          color: "#00e5c3",
+          lineHeight: 1,
+        }}
+      >
+        {count.toLocaleString()}
+        {suffix}
+      </div>
+
+      <div
+        style={{
+          fontSize: "0.875rem",
+          color: "#94a3b8",
+          marginTop: "0.5rem",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/* =========================
+   MAIN APP
+========================= */
+
+export default function App() {
+  const [menuOpen, setMenuOpen] =
+    useState<boolean>(false);
+
+  const [scrolled, setScrolled] =
+    useState<boolean>(false);
+
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const [submitted, setSubmitted] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const handler = () =>
+      setScrolled(window.scrollY > 40);
+
+    window.addEventListener("scroll", handler);
+
+    return () =>
+      window.removeEventListener("scroll", handler);
+  }, []);
+
+  /* =========================
+     FORM SUBMIT
+  ========================= */
+
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    setSubmitted(true);
+
+    setTimeout(() => {
+      setSubmitted(false);
+    }, 3000);
+
+    setFormState({
+      name: "",
+      email: "",
+      message: "",
+    });
+  };
+
+  const navLinks: string[] = [
+    "About",
+    "Monitor",
+    "Report",
+    "Contact",
+  ];
+
+ 
+  return (
+    <div style={{ fontFamily: "'DM Sans', sans-serif", background: "#040d1a", color: "#e2e8f0", overflowX: "hidden", position: "relative" }}>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #040d1a; }
+        ::-webkit-scrollbar-thumb { background: #00e5c3; border-radius: 10px; }
+
+        .nav-link {
+          color: #94a3b8; font-size: 0.9rem; font-weight: 500; cursor: pointer;
+          text-decoration: none; letter-spacing: 0.02em;
+          transition: color 0.2s; position: relative; padding-bottom: 2px;
+        }
+        .nav-link::after {
+          content: ''; position: absolute; bottom: 0; left: 0;
+          width: 0; height: 1.5px; background: #00e5c3;
+          transition: width 0.3s ease;
+        }
+        .nav-link:hover { color: #fff; }
+        .nav-link:hover::after { width: 100%; }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #00e5c3, #0096ff);
+          color: #040d1a; font-weight: 700; font-size: 0.95rem;
+          padding: 0.75rem 1.75rem; border-radius: 100px;
+          border: none; cursor: pointer; letter-spacing: 0.01em;
+          transition: transform 0.2s, box-shadow 0.2s;
+          display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,229,195,0.35); }
+
+        .btn-outline {
+          background: transparent;
+          color: #e2e8f0; font-weight: 500; font-size: 0.95rem;
+          padding: 0.75rem 1.75rem; border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.18); cursor: pointer;
+          transition: border-color 0.2s, background 0.2s, transform 0.2s;
+          display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-outline:hover { border-color: #00e5c3; background: rgba(0,229,195,0.06); transform: translateY(-2px); }
+
+        .feature-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px; padding: 2.25rem 2rem;
+          transition: border-color 0.3s, transform 0.3s, background 0.3s;
+          cursor: default;
+        }
+        .feature-card:hover {
+          border-color: rgba(0,229,195,0.3);
+          background: rgba(0,229,195,0.04);
+          transform: translateY(-6px);
+        }
+
+        .glass-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 20px;
+        }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+        .grid-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; }
+
+        .input-field {
+          width: 100%; background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+          padding: 0.9rem 1.2rem; color: #e2e8f0; font-size: 0.95rem;
+          font-family: 'DM Sans', sans-serif;
+          transition: border-color 0.2s, background 0.2s; outline: none;
+        }
+        .input-field:focus { border-color: #00e5c3; background: rgba(0,229,195,0.04); }
+        .input-field::placeholder { color: #4a5568; }
+
+        .badge {
+          display: inline-flex; align-items: center; gap: 6px;
+          background: rgba(0,229,195,0.1); border: 1px solid rgba(0,229,195,0.25);
+          color: #00e5c3; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+          text-transform: uppercase; padding: 0.35rem 0.9rem; border-radius: 100px;
+        }
+
+        .glow-line {
+          height: 1px; background: linear-gradient(90deg, transparent, rgba(0,229,195,0.4), transparent);
+        }
+
+        .mobile-menu {
+          position: fixed; top: 0; right: 0; bottom: 0; width: 280px;
+          background: #060f20; border-left: 1px solid rgba(255,255,255,0.07);
+          z-index: 200; padding: 2rem 1.5rem;
+          transform: translateX(100%); transition: transform 0.35s ease;
+          display: flex; flex-direction: column; gap: 1.5rem;
+        }
+        .mobile-menu.open { transform: translateX(0); }
+        .menu-overlay {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+          z-index: 199; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .menu-overlay.open { opacity: 1; pointer-events: all; }
+
+        @keyframes floatUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(0,229,195,0.4); } 70% { box-shadow: 0 0 0 16px rgba(0,229,195,0); } 100% { box-shadow: 0 0 0 0 rgba(0,229,195,0); } }
+        @keyframes orb { 0%,100% { transform: scale(1) translate(0,0); } 33% { transform: scale(1.08) translate(20px,-30px); } 66% { transform: scale(0.95) translate(-15px,20px); } }
+        @keyframes scanline { 0% { transform: translateY(-100%); opacity: 0.06; } 100% { transform: translateY(100vh); opacity: 0; } }
+
+        .hero-orb { animation: orb 12s ease-in-out infinite; }
+        .pulse-ring { animation: pulse-ring 2.5s ease-out infinite; }
+
+        @media (max-width: 900px) {
+          .grid-3, .grid-stats { grid-template-columns: 1fr 1fr !important; }
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .contact-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 600px) {
+          .grid-3, .grid-2, .grid-stats { grid-template-columns: 1fr !important; }
+          .nav-links-desktop { display: none !important; }
+          .hamburger { display: flex !important; }
+        }
+        @media (min-width: 601px) { .hamburger { display: none !important; } }
+      `}</style>
+
+      {/* BG AMBIENT ORBS */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div className="hero-orb" style={{ position: "absolute", top: "-15%", left: "-10%", width: "60vw", height: "60vw", background: "radial-gradient(circle, rgba(0,229,195,0.06) 0%, transparent 65%)", borderRadius: "50%" }} />
+        <div className="hero-orb" style={{ position: "absolute", bottom: "10%", right: "-15%", width: "50vw", height: "50vw", background: "radial-gradient(circle, rgba(0,150,255,0.07) 0%, transparent 65%)", borderRadius: "50%", animationDelay: "4s" }} />
+        <div style={{ position: "absolute", top: "40%", left: "45%", width: "30vw", height: "30vw", background: "radial-gradient(circle, rgba(80,0,200,0.04) 0%, transparent 70%)", borderRadius: "50%" }} />
+      </div>
+
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 w-full bg-slate-900 shadow-2xl z-50 backdrop-blur-md bg-opacity-98">
-        <div className="w-full mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          
-          {/* LOGO + NAME */}
-          <div className="flex items-center gap-2 sm:gap-3 hover:opacity-85 transition-all duration-300 cursor-pointer min-w-0 group">
-            <div className="bg-gradient-to-br from-teal-500 to-cyan-600 p-2 rounded-lg group-hover:shadow-lg transition-all duration-300">
-              <img 
-                src={logo} 
-                alt="Clinova Logo" 
-                className="w-8 sm:w-10 h-8 sm:h-10 object-contain filter brightness-0 invert" 
-              />
-            </div>
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-600 bg-clip-text text-transparent truncate">
-              Clinova Sri Lanka
-            </h1>
+      <nav style={{
+        position: "fixed", top: 0, left: 0, width: "100%", zIndex: 100,
+        background: scrolled ? "rgba(4,13,26,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
+        transition: "all 0.4s ease",
+        padding: "0 clamp(1rem, 4vw, 3rem)",
+        display: "flex", alignItems: "center", justifyContent: "space-between", height: "72px",
+      }}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+          <div className="pulse-ring" style={{
+            width: 40, height: 40, borderRadius: "12px",
+            background: "linear-gradient(135deg, #00e5c3, #0096ff)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Activity size={20} color="#040d1a" strokeWidth={2.5} />
           </div>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "1.2rem", letterSpacing: "-0.02em" }}>
+            Clinova <span style={{ color: "#00e5c3" }}>SL</span>
+          </span>
+        </div>
 
-          {/* NAV LINKS */}
-          <ul className="hidden md:flex gap-6 lg:gap-8 text-sm lg:text-base font-medium">
-            <li className="text-gray-700 hover:text-cyan-600 cursor-pointer transition-colors duration-300 relative group">
-              About Us
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-teal-500 to-cyan-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
-            </li>
-            <li className="text-gray-700 hover:text-cyan-600 cursor-pointer transition-colors duration-300 relative group">
-              Report Portal
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-teal-500 to-cyan-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
-            </li>
-            <li className="text-gray-700 hover:text-cyan-600 cursor-pointer transition-colors duration-300 relative group">
-              Contact Us
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-teal-500 to-cyan-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
-            </li>
-          </ul>
+        {/* Desktop nav */}
+        <div className="nav-links-desktop" style={{ display: "flex", gap: "2.5rem" }}>
+          {navLinks.map(l => <a key={l} href={`#${l.toLowerCase()}`} className="nav-link">{l}</a>)}
+        </div>
 
-          {/* LOGIN BUTTON */}
-          <button className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white px-4 sm:px-7 py-2.5 sm:py-3 rounded-full shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-300 font-semibold text-xs sm:text-base whitespace-nowrap">
-            Login
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <button className="btn-primary" style={{ padding: "0.6rem 1.4rem", fontSize: "0.88rem" }}>
+            Login <ArrowRight size={14} />
+          </button>
+          <button className="hamburger" onClick={() => setMenuOpen(true)}
+            style={{ background: "none", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "10px", padding: "8px", cursor: "pointer", color: "#e2e8f0" }}>
+            <Menu size={20} />
           </button>
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <section className="pt-24 sm:pt-36 pb-12 sm:pb-20 bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-          <div className="absolute top-40 right-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-        </div>
-        <div className="w-full mx-auto px-4 sm:px-6 grid md:grid-cols-2 items-center gap-6 sm:gap-10 relative z-10">
-          
-          {/* LEFT TEXT */}
-          <div className="space-y-4 sm:space-y-6">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4 sm:mb-6 animate-fade-in">
-              AI-Based Dengue Outbreak Risk Prediction & Monitoring
-            </h1>
-
-            <p className="text-base sm:text-lg text-gray-100 mb-6 sm:mb-8 leading-relaxed animate-fade-in animation-delay-100">
-              A smart platform for Sri Lanka that helps identify dengue risk
-              zones, monitor outbreaks, and provide early warnings using AI and
-              environmental data.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
-              <button className="bg-slate-900 text-blue-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-semibold hover:bg-gray-100 hover:shadow-xl transform hover:scale-105 transition-all duration-300 shadow-lg text-sm sm:text-base">
-                Explore Portal
-              </button>
-
-              <button className="border-2 border-white text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-semibold hover:bg-slate-900 hover:text-blue-900 transform hover:scale-105 transition-all duration-300 hover:shadow-xl text-sm sm:text-base">
-                Learn More
-              </button>
-            </div>
-          </div>
-
-          {/* RIGHT IMAGE */}
-          <div className="flex justify-center mt-8 sm:mt-0 p-4 sm:p-0">
-            <div className="bg-slate-900 bg-opacity-10 backdrop-blur-lg p-8 sm:p-12 rounded-2xl border border-white border-opacity-20 hover:border-opacity-40 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/20">
-              <img 
-                src={logo} 
-                alt="Clinova Logo" 
-                className="w-32 sm:w-64 md:w-80 h-32 sm:h-64 md:h-80 object-contain drop-shadow-2xl animate-pulse hover:scale-110 transition-transform duration-500 filter brightness-125" 
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT SECTION */}
-      <section className="py-12 sm:py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="w-full mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-900 mb-4 sm:mb-6 animate-fade-in">
-            About Us
-          </h2>
-
-          <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-300 leading-8 animate-fade-in animation-delay-100">
-            Our system is designed to support public health authorities and
-            communities by predicting dengue outbreak risks using artificial
-            intelligence and environmental monitoring data. The platform helps
-            users stay informed and take preventive action early.
-          </p>
-
-          {/* CARDS */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10 sm:mt-14">
-            
-            <div className="group bg-slate-900 p-8 sm:p-10 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 border border-gray-100 hover:border-cyan-300 hover:bg-gradient-to-br hover:from-slate-900 hover:to-cyan-50">
-              <div className="mb-6 transform group-hover:scale-125 transition-transform duration-300 flex justify-center">
-                <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-4 rounded-xl">
-                  <ShieldCheck className="text-cyan-600 w-8 sm:w-10 h-8 sm:h-10" />
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3">Risk Prediction</h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Predict high-risk dengue outbreak zones using advanced AI models and real-time data.
-              </p>
-            </div>
-
-            <div className="group bg-slate-900 p-8 sm:p-10 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 border border-gray-100 hover:border-cyan-300 hover:bg-gradient-to-br hover:from-slate-900 hover:to-cyan-50">
-              <div className="mb-6 transform group-hover:scale-125 transition-transform duration-300 flex justify-center">
-                <div className="bg-gradient-to-br from-orange-100 to-yellow-100 p-4 rounded-xl">
-                  <FileWarning className="text-orange-600 w-8 sm:w-10 h-8 sm:h-10" />
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3">
-                Smart Monitoring
-              </h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Real-time monitoring and instant outbreak reporting system for rapid response.
-              </p>
-            </div>
-
-            <div className="group bg-slate-900 p-8 sm:p-10 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 border border-gray-100 hover:border-cyan-300 hover:bg-gradient-to-br hover:from-slate-900 hover:to-cyan-50 sm:col-span-2 lg:col-span-1">
-              <div className="mb-6 transform group-hover:scale-125 transition-transform duration-300 flex justify-center">
-                <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-4 rounded-xl">
-                  <Info className="text-blue-600 w-8 sm:w-10 h-8 sm:h-10" />
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-blue-900 mb-3">
-                Public Awareness
-              </h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Educating communities with prevention tips, alerts, and health guidelines.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* REPORT PORTAL SECTION */}
-      <section className="py-16 sm:py-24 bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-50 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
-        </div>
-        <div className="w-full mx-auto px-4 sm:px-6 text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-900 mb-6 sm:mb-8 animate-fade-in">
-            Report Dengue Cases & Breeding Sites
-          </h2>
-
-          <p className="text-base sm:text-lg text-gray-700 mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
-            Help us combat dengue by reporting mosquito breeding areas and suspected dengue cases directly through our secure platform. Your reports help save lives.
-          </p>
-
-          <button className="bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 hover:from-cyan-600 hover:via-blue-600 hover:to-blue-700 text-white px-10 sm:px-14 py-4 sm:py-5 rounded-full text-base sm:text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 inline-block">
-            📝 Submit Report Now
+      {/* MOBILE MENU */}
+      <div className={`menu-overlay ${menuOpen ? "open" : ""}`} onClick={() => setMenuOpen(false)} />
+      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>Menu</span>
+          <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}>
+            <X size={22} />
           </button>
         </div>
-      </section>
+        <div className="glow-line" />
+        {navLinks.map(l => (
+          <a key={l} href={`#${l.toLowerCase()}`} className="nav-link" onClick={() => setMenuOpen(false)}
+            style={{ fontSize: "1.1rem", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>{l}</a>
+        ))}
+        <button className="btn-primary" style={{ marginTop: "auto", justifyContent: "center" }}>
+          Login <ArrowRight size={14} />
+        </button>
+      </div>
 
-      {/* CONTACT SECTION */}
-      <section className="py-16 sm:py-24 bg-gradient-to-b from-white via-gray-50 to-white">
-        <div className="w-full mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-900 to-cyan-600 bg-clip-text text-transparent mb-4 sm:mb-6 animate-fade-in">
-              Get In Touch With Us
-            </h2>
-            <p className="text-gray-700 text-base sm:text-lg font-medium">
-              Have questions or need support? We're here to help you fight dengue.
+      {/* HERO */}
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", zIndex: 1, padding: "100px clamp(1rem, 4vw, 3rem) 60px" }}>
+        <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center", width: "100%", maxWidth: 1200, margin: "0 auto" }}>
+
+          {/* Left */}
+          <div style={{ animation: "floatUp 0.9s ease forwards" }}>
+            <div className="badge" style={{ marginBottom: "1.75rem" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#00e5c3", display: "inline-block" }} />
+              AI-Powered Health Platform
+            </div>
+
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2.4rem, 5vw, 4rem)", lineHeight: 1.1, letterSpacing: "-0.03em", marginBottom: "1.5rem" }}>
+              Predict Dengue.<br />
+              <span style={{ color: "#00e5c3" }}>Protect Lives.</span><br />
+              Save Sri Lanka.
+            </h1>
+
+            <p style={{ fontSize: "1.05rem", color: "#94a3b8", lineHeight: 1.75, maxWidth: 480, marginBottom: "2.5rem" }}>
+              An intelligent surveillance and early-warning platform powered by AI and real-time environmental data — helping communities and health authorities act before outbreaks happen.
             </p>
+
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <button className="btn-primary">
+                Explore Portal <ArrowRight size={16} />
+              </button>
+              <button className="btn-outline">
+                Watch Demo
+              </button>
+            </div>
+
+            <div style={{ display: "flex", gap: "2.5rem", marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              {[["98%", "Prediction Accuracy"], ["47", "Districts Monitored"], ["24/7", "Live Surveillance"]].map(([val, lbl]) => (
+                <div key={lbl}>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.5rem", color: "#00e5c3" }}>{val}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.04em", marginTop: "2px" }}>{lbl}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
-            
-            {/* CONTACT INFO */}
-            <div className="bg-slate-900 p-8 sm:p-12 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2">
-              <h3 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-8">
-                📞 Contact Information
-              </h3>
-
-              <div className="space-y-6">
-                <div className="flex items-start gap-4 group">
-                  <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-3 rounded-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                    <Phone className="text-cyan-600 w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm sm:text-base">Phone</p>
-                    <p className="text-slate-300 text-sm sm:text-base">+94 77 123 4567</p>
-                  </div>
+          {/* Right — visual panel */}
+          <div style={{ animation: "floatUp 0.9s 0.2s ease both" }}>
+            <div className="glass-card" style={{ padding: "2rem", position: "relative", overflow: "hidden" }}>
+              {/* Fake chart/dashboard visual */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                <div>
+                  <div style={{ fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.06em", textTransform: "uppercase" }}>Risk Index — Colombo District</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "2rem", color: "#f59e0b", marginTop: "4px" }}>HIGH</div>
                 </div>
-
-                <div className="flex items-start gap-4 group">
-                  <div className="bg-gradient-to-br from-orange-100 to-yellow-100 p-3 rounded-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                    <span className="text-2xl">📧</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm sm:text-base">Email</p>
-                    <p className="text-slate-300 text-sm sm:text-base">support@dengueshield.lk</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4 group">
-                  <div className="bg-gradient-to-br from-red-100 to-pink-100 p-3 rounded-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                    <span className="text-2xl">📍</span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm sm:text-base">Location</p>
-                    <p className="text-slate-300 text-sm sm:text-base">Colombo, Sri Lanka</p>
-                  </div>
+                <div style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "12px", padding: "0.5rem 1rem" }}>
+                  <Bell size={20} color="#f59e0b" />
                 </div>
               </div>
+
+              {/* Bar chart simulation */}
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: 120, marginBottom: "0.75rem" }}>
+                {[45, 62, 55, 80, 75, 95, 88, 72, 60, 85, 92, 100].map((h, i) => (
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                    <div style={{
+                      height: `${h}%`,
+                      borderRadius: "4px 4px 0 0",
+                      background: i === 11 ? "linear-gradient(0deg, #00e5c3, #0096ff)" : i > 8 ? "rgba(245,158,11,0.5)" : "rgba(255,255,255,0.06)",
+                      transition: "height 0.8s ease",
+                    }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.7rem", color: "#4a5568" }}>
+                <span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Now</span>
+              </div>
+
+              <div className="glow-line" style={{ margin: "1.5rem 0" }} />
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                {[
+                  { icon: <MapPin size={16} />, label: "Active Zones", val: "12 Areas", color: "#f87171" },
+                  { icon: <Users size={16} />, label: "Cases Today", val: "+34 New", color: "#f59e0b" },
+                  { icon: <Activity size={16} />, label: "AI Confidence", val: "97.2%", color: "#00e5c3" },
+                  { icon: <ShieldCheck size={16} />, label: "Alerts Sent", val: "1,204", color: "#818cf8" },
+                ].map(({ icon, label, val, color }) => (
+                  <div key={label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ color, display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", fontSize: "0.8rem" }}>
+                      {icon} <span>{label}</span>
+                    </div>
+                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll cue */}
+        <div style={{ position: "absolute", bottom: "2rem", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", opacity: 0.4 }}>
+          <span style={{ fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>Scroll</span>
+          <ChevronDown size={16} />
+        </div>
+      </section>
+
+      {/* STATS BAND */}
+      <section style={{ position: "relative", zIndex: 1, padding: "4rem clamp(1rem, 4vw, 3rem)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <div className="grid-stats" style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <StatCounter end={1200} suffix="+" label="Reports Filed" />
+          <StatCounter end={47} label="Districts Covered" />
+          <StatCounter end={98} suffix="%" label="AI Accuracy" />
+          <StatCounter end={250000} suffix="+" label="People Protected" />
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section id="about" style={{ padding: "7rem clamp(1rem, 4vw, 3rem)", position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto" }}>
+        <RevealSection>
+          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <div className="badge" style={{ marginBottom: "1.25rem" }}>What We Do</div>
+            <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.03em", marginBottom: "1.25rem" }}>
+              Intelligence at Every Layer
+            </h2>
+            <p style={{ color: "#64748b", maxWidth: 560, margin: "0 auto", lineHeight: 1.8 }}>
+              Clinova combines machine learning, satellite weather data, and community reports to give Sri Lanka's health officials a real-time edge against dengue outbreaks.
+            </p>
+          </div>
+        </RevealSection>
+
+        <div className="grid-3">
+          {[
+            {
+              icon: <ShieldCheck size={24} />,
+              color: "#00e5c3",
+              bg: "rgba(0,229,195,0.08)",
+              title: "Risk Prediction",
+              desc: "Our ML models analyze rainfall, temperature, population density, and historical case data to forecast high-risk zones up to 2 weeks in advance.",
+              tag: "AI / ML"
+            },
+            {
+              icon: <FileWarning size={24} />,
+              color: "#f59e0b",
+              bg: "rgba(245,158,11,0.08)",
+              title: "Smart Monitoring",
+              desc: "Real-time dashboards aggregate data from hospitals, community reports, and IoT sensors to give authorities a complete situational picture instantly.",
+              tag: "Real-Time"
+            },
+            {
+              icon: <Info size={24} />,
+              color: "#818cf8",
+              bg: "rgba(129,140,248,0.08)",
+              title: "Public Awareness",
+              desc: "Targeted alerts, prevention guides, and interactive maps delivered to citizens via mobile — in Sinhala, Tamil, and English.",
+              tag: "Community"
+            },
+          ].map(({ icon, color, bg, title, desc, tag }, i) => (
+            <RevealSection key={title} delay={i * 100}>
+              <div className="feature-card">
+                <div style={{ width: 52, height: 52, borderRadius: "14px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", color }}>
+                  {icon}
+                </div>
+                <div style={{ fontSize: "0.72rem", color, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, marginBottom: "0.75rem" }}>{tag}</div>
+                <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.2rem", marginBottom: "0.9rem" }}>{title}</h3>
+                <p style={{ color: "#64748b", lineHeight: 1.75, fontSize: "0.93rem" }}>{desc}</p>
+              </div>
+            </RevealSection>
+          ))}
+        </div>
+      </section>
+
+      {/* REPORT CTA */}
+      <section id="report" style={{ padding: "0 clamp(1rem, 4vw, 3rem) 7rem", position: "relative", zIndex: 1 }}>
+        <RevealSection>
+          <div style={{
+            maxWidth: 1200, margin: "0 auto",
+            background: "linear-gradient(135deg, rgba(0,229,195,0.08) 0%, rgba(0,150,255,0.08) 100%)",
+            border: "1px solid rgba(0,229,195,0.15)",
+            borderRadius: "28px", padding: "clamp(2.5rem, 5vw, 4.5rem) clamp(1.5rem, 4vw, 4rem)",
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: "2rem", flexWrap: "wrap",
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{ position: "absolute", top: "-30%", right: "-5%", width: "40%", height: "200%", background: "radial-gradient(ellipse, rgba(0,229,195,0.06) 0%, transparent 60%)", pointerEvents: "none" }} />
+
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div className="badge" style={{ marginBottom: "1.25rem" }}>📋 Community Action</div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)", letterSpacing: "-0.02em", marginBottom: "1rem" }}>
+                Spotted a Breeding Site?
+              </h2>
+              <p style={{ color: "#64748b", lineHeight: 1.75, maxWidth: 500 }}>
+                Your report matters. Every submission is geo-tagged, analyzed by our AI, and forwarded to local health teams within minutes — turning citizens into first responders.
+              </p>
             </div>
 
-            {/* CONTACT FORM */}
-            <div className="bg-slate-900 p-8 sm:p-12 rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2">
-              <h3 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-8">
-                ✉️ Send us a Message
-              </h3>
-              <form className="space-y-5">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all duration-300 placeholder-gray-400 font-medium text-sm sm:text-base"
-                  />
-                </div>
-
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all duration-300 placeholder-gray-400 font-medium text-sm sm:text-base"
-                  />
-                </div>
-
-                <div>
-                  <textarea
-                    rows={5}
-                    placeholder="Your Message"
-                    className="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all duration-300 placeholder-gray-400 resize-none font-medium text-sm sm:text-base"
-                  ></textarea>
-                </div>
-
-                <button className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-blue-600 hover:from-cyan-600 hover:via-blue-600 hover:to-blue-700 text-white px-6 py-3 sm:py-4 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm sm:text-base">
-                  Send Message ➜
-                </button>
-              </form>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "flex-start" }}>
+              <button className="btn-primary" style={{ fontSize: "1rem", padding: "1rem 2rem" }}>
+                Submit a Report <ArrowRight size={18} />
+              </button>
+              <span style={{ fontSize: "0.8rem", color: "#4a5568", paddingLeft: "0.25rem" }}>Takes less than 2 minutes • Anonymous option available</span>
             </div>
+          </div>
+        </RevealSection>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" style={{ padding: "0 clamp(1rem, 4vw, 3rem) 8rem", position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <RevealSection>
+            <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+              <div className="badge" style={{ marginBottom: "1.25rem" }}>Get In Touch</div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.03em" }}>
+                We're Here to Help
+              </h2>
+            </div>
+          </RevealSection>
+
+          <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: "2rem" }}>
+            {/* Info */}
+            <RevealSection>
+              <div className="glass-card" style={{ padding: "2.5rem", height: "100%" }}>
+                <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.3rem", marginBottom: "2rem" }}>Contact Details</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                  {[
+                    { icon: <Phone size={18} />, label: "Phone", val: "+94 77 123 4567", color: "#00e5c3" },
+                    { icon: <Mail size={18} />, label: "Email", val: "support@clinova.lk", color: "#818cf8" },
+                    { icon: <MapPin size={18} />, label: "Location", val: "Colombo, Sri Lanka", color: "#f87171" },
+                  ].map(({ icon, label, val, color }) => (
+                    <div key={label} style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "10px", background: `${color}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color }}>
+                        {icon}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "0.75rem", color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "2px" }}>{label}</div>
+                        <div style={{ fontWeight: 500 }}>{val}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="glow-line" style={{ margin: "2rem 0" }} />
+                <div style={{ fontSize: "0.85rem", color: "#4a5568", lineHeight: 1.7 }}>
+                  Response times: <span style={{ color: "#00e5c3" }}>Under 4 hours</span> on business days. Emergency health alerts are handled 24/7.
+                </div>
+              </div>
+            </RevealSection>
+
+            {/* Form */}
+            <RevealSection delay={100}>
+              <div className="glass-card" style={{ padding: "2.5rem" }}>
+                <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "1.3rem", marginBottom: "2rem" }}>Send a Message</h3>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    <input className="input-field" placeholder="Your name" value={formState.name} onChange={e => setFormState(s => ({ ...s, name: e.target.value }))} required />
+                    <input className="input-field" type="email" placeholder="Email address" value={formState.email} onChange={e => setFormState(s => ({ ...s, email: e.target.value }))} required />
+                  </div>
+                  <textarea className="input-field" rows={5} placeholder="How can we help you?" value={formState.message} onChange={e => setFormState(s => ({ ...s, message: e.target.value }))} required style={{ resize: "vertical" }} />
+                  <button type="submit" className="btn-primary" style={{ justifyContent: "center", padding: "0.9rem" }}>
+                    {submitted ? "✓ Message Sent!" : <>Send Message <ArrowRight size={16} /></>}
+                  </button>
+                </form>
+              </div>
+            </RevealSection>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gradient-to-r from-blue-950 via-blue-900 to-cyan-900 text-white py-12 sm:py-16 border-t-4 border-cyan-500">
-        <div className="w-full mx-auto px-4 sm:px-6">
-          <div className="flex flex-col items-center justify-center gap-6 sm:gap-8">
-            
-            <div className="flex items-center gap-3 hover:opacity-90 transition-opacity cursor-pointer group">
-              <div className="bg-slate-900 bg-opacity-10 p-2.5 rounded-lg group-hover:bg-opacity-20 transition-all duration-300">
-                <img 
-                src={logo} 
-                alt="Clinova  Logo" 
-                className="w-14 h-14 object-contain object-contain drop-shadow-2xl animate-pulse hover:scale-110 transition-transform duration-500 filter brightness-125" 
-              />
+      <footer style={{
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: "3rem clamp(1rem, 4vw, 3rem)",
+        position: "relative", zIndex: 1,
+        background: "rgba(0,0,0,0.2)",
+      }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "2rem", marginBottom: "2.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ width: 38, height: 38, borderRadius: "10px", background: "linear-gradient(135deg, #00e5c3, #0096ff)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Activity size={18} color="#040d1a" strokeWidth={2.5} />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold">
-                Clinova Sri Lanka
-              </h2>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>
+                Clinova <span style={{ color: "#00e5c3" }}>SL</span>
+              </span>
             </div>
-
-            <p className="text-gray-200 text-center text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Protecting Sri Lanka from dengue through AI-powered prediction, real-time monitoring, and community awareness.
-            </p>
-
-            <div className="flex gap-4 sm:gap-6">
-              <a href="#" className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-slate-900 bg-opacity-10 hover:bg-cyan-500 transition-all duration-300 flex items-center justify-center font-semibold text-lg hover:scale-110 transform">
-                f
-              </a>
-              <a href="#" className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-slate-900 bg-opacity-10 hover:bg-cyan-500 transition-all duration-300 flex items-center justify-center font-semibold text-lg hover:scale-110 transform">
-                𝕏
-              </a>
-              <a href="#" className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-slate-900 bg-opacity-10 hover:bg-cyan-500 transition-all duration-300 flex items-center justify-center font-semibold text-lg hover:scale-110 transform">
-                in
-              </a>
+            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+              {navLinks.map(l => <a key={l} href={`#${l.toLowerCase()}`} className="nav-link" style={{ fontSize: "0.85rem" }}>{l}</a>)}
             </div>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              {["f", "𝕏", "in"].map(s => (
+                <a key={s} href="#" style={{
+                  width: 38, height: 38, borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#64748b", fontSize: "0.9rem", textDecoration: "none",
+                  transition: "border-color 0.2s, color 0.2s",
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#00e5c3"; e.currentTarget.style.color = "#00e5c3"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#64748b"; }}>
+                  {s}
+                </a>
+              ))}
+            </div>
+          </div>
 
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+          <div className="glow-line" style={{ marginBottom: "1.5rem" }} />
 
-            <p className="text-gray-300 text-center text-xs sm:text-sm">
-              © 2026 Clinova Sri Lanka. All Rights Reserved. | Built with ❤️ for public health
-            </p>
+          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", fontSize: "0.8rem", color: "#334155" }}>
+            <span>© 2026 Clinova Sri Lanka. All rights reserved.</span>
+            <span style={{ color: "#1e40af" }}>Built with care for public health in Sri Lanka 🇱🇰</span>
           </div>
         </div>
       </footer>
     </div>
   );
 }
-
-export default App;
