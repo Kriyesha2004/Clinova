@@ -3,17 +3,52 @@ import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface LoginProps {
   onBackToHome?: () => void; // Optional callback to return to the landing page
+  onLoginSuccess?: (dashboardType: string, user: any) => void; // Callback on successful login
 }
 
-export default function Login({ onBackToHome }: LoginProps) {
+export default function Login({ onBackToHome, onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle your authentication logic here
-    console.log('Logging in with:', { email, password });
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('dashboardType', data.dashboardType);
+
+      // Call the callback with login data
+      if (onLoginSuccess) {
+        onLoginSuccess(data.dashboardType, data.user);
+      }
+    } catch (err) {
+      setError('An error occurred during login');
+      console.error('Login error:', err);
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,9 +111,16 @@ export default function Login({ onBackToHome }: LoginProps) {
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div style={styles.errorBox}>
+              <p style={styles.errorText}>{error}</p>
+            </div>
+          )}
+
           {/* Submit Button */}
-          <button type="submit" style={styles.submitBtn}>
-            Sign In <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+          <button type="submit" style={styles.submitBtn} disabled={loading}>
+            {loading ? 'Signing In...' : 'Sign In'} <ArrowRight size={16} style={{ marginLeft: '8px' }} />
           </button>
         </form>
 
@@ -240,6 +282,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'opacity 0.2s',
     marginTop: '10px',
+  },
+  errorBox: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    borderRadius: '8px',
+    padding: '12px 16px',
+    marginBottom: '10px',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: '0.9rem',
+    margin: 0,
   },
   backBtn: {
     display: 'block',

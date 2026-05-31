@@ -15,8 +15,9 @@ import {
   Users,
 } from "lucide-react";
 import Login from './Login';
-
-const LOGO_PLACEHOLDER = null;
+import MOHDashboard from './MOHDashboard';
+import PHIDashboard from './PHIDashboard';
+import HospitalDashboard from './HospitalDashboard';
 
 /* =========================
    SCROLL REVEAL HOOK
@@ -155,9 +156,10 @@ function StatCounter({
 ========================= */
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'login'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital'>('home');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
 
   const [formState, setFormState] = useState({
     name: "",
@@ -176,6 +178,34 @@ export default function App() {
     return () =>
       window.removeEventListener("scroll", handler);
   }, []);
+
+  /* =========================
+     HANDLE LOGIN SUCCESS
+  ========================= */
+  
+  const handleLoginSuccess = (dashboardType: string, userData: any) => {
+    setUser(userData);
+    
+    if (dashboardType === 'moh') {
+      setCurrentView('moh');
+    } else if (dashboardType === 'phi') {
+      setCurrentView('phi');
+    } else if (dashboardType === 'hospital') {
+      setCurrentView('hospital');
+    }
+  };
+
+  /* =========================
+     HANDLE LOGOUT
+  ========================= */
+  
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('dashboardType');
+    setCurrentView('home');
+  };
 
   /* =========================
      FORM SUBMIT
@@ -209,7 +239,19 @@ export default function App() {
      CONDITIONAL ROUTING VIEW
   ========================= */
   if (currentView === 'login') {
-    return <Login onBackToHome={() => setCurrentView('home')} />;
+    return <Login onBackToHome={() => setCurrentView('home')} onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  if (currentView === 'moh' && user) {
+    return <MOHDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  if (currentView === 'phi' && user) {
+    return <PHIDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  if (currentView === 'hospital' && user) {
+    return <HospitalDashboard user={user} onLogout={handleLogout} />;
   }
 
   return (
@@ -708,6 +750,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-    </div>
+   </div> 
   );
 }
