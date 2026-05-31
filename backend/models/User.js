@@ -9,12 +9,17 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true, // Prevents duplicate registrations
+    unique: true,
     lowercase: true,
     trim: true
   },
   password: {
     type: String,
+    required: true
+  },
+  dashboardType: {
+    type: String,
+    enum: ['moh', 'phi', 'hospital'],  // Only these 3 values allowed
     required: true
   },
   createdAt: {
@@ -23,4 +28,4 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('User', UserSchema,'Login');
+module.exports = mongoose.model('User', UserSchema, 'Login');

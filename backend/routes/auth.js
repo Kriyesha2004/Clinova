@@ -10,23 +10,21 @@ const User = require('../models/User');
 ========================================== */
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, dashboardType } = req.body; // ← add dashboardType
 
-    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'User already registered with this email' });
     }
 
-    // Hash the password securely
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create and save user
     user = new User({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      dashboardType  // ← add this
     });
 
     await user.save();
@@ -45,27 +43,22 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email existence
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Check password match
+    // ← Replace your if/else password check with this
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Sign a secure JWT session token
     const token = jwt.sign(
-      { userId: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1d' } // Session valid for 1 day
+      { userId: user._id, dashboardType: user.dashboardType }, // ← from DB, not hardcoded
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
     );
 
     res.json({
       token,
+      dashboardType: user.dashboardType,  // ← from DB
       user: { id: user._id, name: user.name, email: user.email }
     });
 
@@ -75,3 +68,8 @@ router.post('/login', async (req, res) => {
 });
 
 module.exports = router;
+
+
+// MOH dahboard - passwor  moh123 - moh@clinova.com
+// PHI dahboard - password phi123 - phi@clinova.com
+// Hospital bashboard - password hospital123 - hospital@clinova.com
