@@ -38,7 +38,7 @@ export default function HospitalDashboard({ user, onLogout }: HospitalDashboardP
         <div style={styles.statsGrid}>
           {/* Stats Cards */}
           <div style={styles.statCard}>
-            <div style={styles.statIcon} style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+            <div style={{...styles.statIcon, backgroundColor: 'rgba(59, 130, 246, 0.1)'}}>
               <Bed size={24} color="#3b82f6" />
             </div>
             <div style={styles.statInfo}>
@@ -48,7 +48,7 @@ export default function HospitalDashboard({ user, onLogout }: HospitalDashboardP
           </div>
 
           <div style={styles.statCard}>
-            <div style={styles.statIcon} style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+            <div style={{...styles.statIcon, backgroundColor: 'rgba(239, 68, 68, 0.1)'}}>
               <AlertCircle size={24} color="#ef4444" />
             </div>
             <div style={styles.statInfo}>
@@ -58,7 +58,7 @@ export default function HospitalDashboard({ user, onLogout }: HospitalDashboardP
           </div>
 
           <div style={styles.statCard}>
-            <div style={styles.statIcon} style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
+            <div style={{...styles.statIcon, backgroundColor: 'rgba(34, 197, 94, 0.1)'}}>
               <Users size={24} color="#22c55e" />
             </div>
             <div style={styles.statInfo}>
@@ -68,7 +68,7 @@ export default function HospitalDashboard({ user, onLogout }: HospitalDashboardP
           </div>
 
           <div style={styles.statCard}>
-            <div style={styles.statIcon} style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)' }}>
+            <div style={{...styles.statIcon, backgroundColor: 'rgba(168, 85, 247, 0.1)'}}>
               <Stethoscope size={24} color="#a855f7" />
             </div>
             <div style={styles.statInfo}>

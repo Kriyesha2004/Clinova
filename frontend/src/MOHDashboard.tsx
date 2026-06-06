@@ -1,18 +1,49 @@
 import React, { useState } from 'react';
-import { LogOut, BarChart3, Users, FileText, AlertCircle } from 'lucide-react';
+import { LogOut, BarChart3, Users, AlertCircle } from 'lucide-react';
+import AIAnalytics from './AIAnalytics';
+import ViewReports from './ViewReports';
+import Alerts from './MohAlerts';
 
 interface MOHDashboardProps {
   user: { id: string; name: string; email: string };
   onLogout?: () => void;
+  setCurrentView?: (view: 'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts') => void;
 }
 
-export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
+export default function MOHDashboard({ user, onLogout, setCurrentView }: MOHDashboardProps) {
   const [stats] = useState({
     totalHealthCenters: 145,
     activeCampaigns: 12,
     population: 2500000,
     vaccinated: 1850000,
   });
+
+  const handleAIAnalytics = () => {
+    console.log('Navigating to AI Analytics');
+    if (setCurrentView) {
+      setCurrentView('ai-analytics');
+    } else {
+      alert('AI Analytics feature coming soon!');
+    }
+  };
+
+  const handleViewReports = () => {
+    console.log('Navigating to View Reports');
+    if (setCurrentView) {
+      setCurrentView('view-reports');
+    } else {
+      alert('View Reports feature coming soon!');
+    }
+  };
+
+  const handleAlerts = () => {
+    console.log('Navigating to Alerts');
+    if (setCurrentView) {
+      setCurrentView('alerts');
+    } else {
+      alert('Alerts feature coming soon!');
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -80,22 +111,9 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Quick Actions</h2>
           <div style={styles.actionGrid}>
-            <button style={styles.actionBtn}>
-              <FileText size={20} />
-              <span>View Reports</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <Users size={20} />
-              <span>Manage Health Centers</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <BarChart3 size={20} />
-              <span>Analytics</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <AlertCircle size={20} />
-              <span>Health Alerts</span>
-            </button>
+            <AIAnalytics onClick={handleAIAnalytics} />
+            <ViewReports onClick={handleViewReports} />
+            <Alerts onClick={handleAlerts} />
           </div>
         </div>
       </main>

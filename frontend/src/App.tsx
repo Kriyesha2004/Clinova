@@ -156,7 +156,7 @@ function StatCounter({
 ========================= */
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts'>('home');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
@@ -243,7 +243,7 @@ export default function App() {
   }
 
   if (currentView === 'moh' && user) {
-    return <MOHDashboard user={user} onLogout={handleLogout} />;
+    return <MOHDashboard user={user} onLogout={handleLogout} setCurrentView={setCurrentView} />
   }
 
   if (currentView === 'phi' && user) {
