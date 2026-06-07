@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { LogOut, BarChart3, Users, AlertCircle } from 'lucide-react';
+import { LogOut, BarChart3, Users, AlertCircle, ArrowLeft } from 'lucide-react';
 import AIAnalytics from './AIAnalytics';
 import ViewReports from './ViewReports';
-import Alerts from './MohAlerts';
+import MohAlerts from './MohAlerts';
 
 interface MOHDashboardProps {
   user: { id: string; name: string; email: string };
   onLogout?: () => void;
-  setCurrentView?: (view: 'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts') => void;
 }
 
-export default function MOHDashboard({ user, onLogout, setCurrentView }: MOHDashboardProps) {
+export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
+  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts'>('dashboard');
+  
   const [stats] = useState({
     totalHealthCenters: 145,
     activeCampaigns: 12,
@@ -20,31 +21,112 @@ export default function MOHDashboard({ user, onLogout, setCurrentView }: MOHDash
 
   const handleAIAnalytics = () => {
     console.log('Navigating to AI Analytics');
-    if (setCurrentView) {
-      setCurrentView('ai-analytics');
-    } else {
-      alert('AI Analytics feature coming soon!');
-    }
+    setCurrentSubView('ai-analytics');
   };
 
   const handleViewReports = () => {
     console.log('Navigating to View Reports');
-    if (setCurrentView) {
-      setCurrentView('view-reports');
-    } else {
-      alert('View Reports feature coming soon!');
-    }
+    setCurrentSubView('view-reports');
   };
 
   const handleAlerts = () => {
     console.log('Navigating to Alerts');
-    if (setCurrentView) {
-      setCurrentView('alerts');
-    } else {
-      alert('Alerts feature coming soon!');
-    }
+    setCurrentSubView('alerts');
   };
 
+  const handleBackToDashboard = () => {
+    setCurrentSubView('dashboard');
+  };
+
+  // Render sub-views
+  if (currentSubView === 'ai-analytics') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <button 
+          onClick={handleBackToDashboard}
+          style={{ 
+            position: 'fixed', 
+            top: '20px', 
+            left: '20px', 
+            zIndex: 50,
+            padding: '10px 20px',
+            backgroundColor: 'rgba(0, 229, 195, 0.1)',
+            border: '1px solid rgba(0, 229, 195, 0.3)',
+            color: '#00e5c3',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </button>
+        <AIAnalytics isFullPage={true} />
+      </div>
+    );
+  }
+
+  if (currentSubView === 'view-reports') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <button 
+          onClick={handleBackToDashboard}
+          style={{ 
+            position: 'fixed', 
+            top: '20px', 
+            left: '20px', 
+            zIndex: 50,
+            padding: '10px 20px',
+            backgroundColor: 'rgba(0, 229, 195, 0.1)',
+            border: '1px solid rgba(0, 229, 195, 0.3)',
+            color: '#00e5c3',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </button>
+        <ViewReports isFullPage={true} />
+      </div>
+    );
+  }
+
+  if (currentSubView === 'alerts') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <button 
+          onClick={handleBackToDashboard}
+          style={{ 
+            position: 'fixed', 
+            top: '20px', 
+            left: '20px', 
+            zIndex: 50,
+            padding: '10px 20px',
+            backgroundColor: 'rgba(0, 229, 195, 0.1)',
+            border: '1px solid rgba(0, 229, 195, 0.3)',
+            color: '#00e5c3',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </button>
+        <MohAlerts isFullPage={true} />
+      </div>
+    );
+  }
+
+  // Main dashboard view
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -113,7 +195,7 @@ export default function MOHDashboard({ user, onLogout, setCurrentView }: MOHDash
           <div style={styles.actionGrid}>
             <AIAnalytics onClick={handleAIAnalytics} />
             <ViewReports onClick={handleViewReports} />
-            <Alerts onClick={handleAlerts} />
+            <MohAlerts onClick={handleAlerts} />
           </div>
         </div>
       </main>

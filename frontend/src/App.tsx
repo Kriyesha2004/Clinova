@@ -243,7 +243,7 @@ export default function App() {
   }
 
   if (currentView === 'moh' && user) {
-    return <MOHDashboard user={user} onLogout={handleLogout} setCurrentView={setCurrentView} />
+    return <MOHDashboard user={user} onLogout={handleLogout} />
   }
 
   if (currentView === 'phi' && user) {
