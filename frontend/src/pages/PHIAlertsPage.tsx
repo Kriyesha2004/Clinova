@@ -1,11 +1,37 @@
-import React from 'react';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, AlertCircle, Loader } from 'lucide-react';
+import { alertService } from '../services/alertService';
 
 interface PHIAlertsPageProps {
   onBack: () => void;
 }
 
 export default function PHIAlertsPage({ onBack }: PHIAlertsPageProps) {
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const data = await alertService.getAllAlerts();
+        setAlerts(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load alerts');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+    // Refresh alerts every 10 seconds
+    const interval = setInterval(fetchAlerts, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div style={styles.container}>
       <header style={styles.header}>
@@ -25,28 +51,59 @@ export default function PHIAlertsPage({ onBack }: PHIAlertsPageProps) {
             
             <div style={styles.section}>
               <h3 style={styles.sectionTitle}>Recent Alerts</h3>
+              {loading && (
+                <div style={styles.loadingContainer}>
+                  <Loader size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                  <p style={styles.loadingText}>Loading alerts...</p>
+                </div>
+              )}
+              {error && (
+                <div style={styles.errorContainer}>
+                  <p style={styles.errorText}>{error}</p>
+                </div>
+              )}
+              {!loading && alerts.length === 0 && (
+                <p style={styles.noAlerts}>No alerts at the moment</p>
+              )}
               <div style={styles.alertList}>
-                <div style={{...styles.alertItem, borderLeft: '4px solid #ef4444'}}>
-                  <div style={styles.alertHeader}>
-                    <span style={{...styles.alertLevel, color: '#ef4444'}}>CRITICAL</span>
-                    <span style={styles.alertTime}>2 hours ago</span>
+                {alerts.map((alert: any) => (
+                  <div
+                    key={alert._id}
+                    style={{
+                      ...styles.alertItem,
+                      borderLeft: `4px solid ${
+                        alert.level === 'CRITICAL'
+                          ? '#ef4444'
+                          : alert.level === 'WARNING'
+                          ? '#f59e0b'
+                          : '#22c55e'
+                      }`,
+                    }}
+                  >
+                    <div style={styles.alertHeader}>
+                      <span
+                        style={{
+                          ...styles.alertLevel,
+                          color:
+                            alert.level === 'CRITICAL'
+                              ? '#ef4444'
+                              : alert.level === 'WARNING'
+                              ? '#f59e0b'
+                              : '#22c55e',
+                        }}
+                      >
+                        {alert.level}
+                      </span>
+                      <span style={styles.alertTime}>
+                        {new Date(alert.timestamp).toLocaleDateString()} {new Date(alert.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p style={styles.alertMessage}>{alert.message}</p>
+                    {alert.details?.userId && (
+                      <p style={styles.alertDetails}>User ID: {alert.details.userId}</p>
+                    )}
                   </div>
-                  <p style={styles.alertMessage}>Unauthorized access attempt detected on User ID: 12345</p>
-                </div>
-                <div style={{...styles.alertItem, borderLeft: '4px solid #f59e0b'}}>
-                  <div style={styles.alertHeader}>
-                    <span style={{...styles.alertLevel, color: '#f59e0b'}}>WARNING</span>
-                    <span style={styles.alertTime}>5 hours ago</span>
-                  </div>
-                  <p style={styles.alertMessage}>File access from unusual location detected</p>
-                </div>
-                <div style={{...styles.alertItem, borderLeft: '4px solid #22c55e'}}>
-                  <div style={styles.alertHeader}>
-                    <span style={{...styles.alertLevel, color: '#22c55e'}}>INFO</span>
-                    <span style={styles.alertTime}>8 hours ago</span>
-                  </div>
-                  <p style={styles.alertMessage}>System backup completed successfully</p>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -157,5 +214,40 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     margin: '8px 0 0 0',
     lineHeight: '1.5',
+  },
+  alertDetails: {
+    fontSize: '12px',
+    color: '#94a3b8',
+    margin: '8px 0 0 0',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px',
+    gap: '16px',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#94a3b8',
+  },
+  errorContainer: {
+    padding: '16px',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    borderRadius: '8px',
+    marginBottom: '16px',
+  },
+  errorText: {
+    color: '#ef4444',
+    margin: 0,
+    fontSize: '14px',
+  },
+  noAlerts: {
+    fontSize: '14px',
+    color: '#94a3b8',
+    textAlign: 'center',
+    padding: '24px',
   },
 };

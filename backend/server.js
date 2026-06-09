@@ -25,6 +25,9 @@ app.get('/', (req, res) => {
 // Import Auth Routes (We will make this in Step 5)
 app.use('/api/auth', require('./routes/auth'));
 
+// Import Alerts Routes
+app.use('/api/alerts', require('./routes/alerts'));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
