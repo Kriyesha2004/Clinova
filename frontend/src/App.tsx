@@ -18,6 +18,10 @@ import Login from './Login';
 import MOHDashboard from './MOHDashboard';
 import PHIDashboard from './PHIDashboard';
 import HospitalDashboard from './HospitalDashboard';
+import CityVisitTimeTablePage from './pages/CityVisitTimeTablePage';
+import AccessControlPage from './pages/AccessControlPage';
+import PHIAlertsPage from './pages/PHIAlertsPage';
+import ComplianceReportsPage from './pages/ComplianceReportsPage';
 
 /* =========================
    SCROLL REVEAL HOOK
@@ -156,7 +160,7 @@ function StatCounter({
 ========================= */
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts' | 'phi-city-visit' | 'phi-access-control' | 'phi-alerts' | 'phi-compliance'>('home');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
@@ -208,6 +212,30 @@ export default function App() {
   };
 
   /* =========================
+     NAVIGATION HANDLERS FOR PHI PAGES
+  ========================= */
+  
+  const handleNavigateCityVisit = () => {
+    setCurrentView('phi-city-visit');
+  };
+
+  const handleNavigateAccessControl = () => {
+    setCurrentView('phi-access-control');
+  };
+
+  const handleNavigateAlerts = () => {
+    setCurrentView('phi-alerts');
+  };
+
+  const handleNavigateComplianceReports = () => {
+    setCurrentView('phi-compliance');
+  };
+
+  const handleBackToPHI = () => {
+    setCurrentView('phi');
+  };
+
+  /* =========================
      FORM SUBMIT
   ========================= */
 
@@ -247,7 +275,30 @@ export default function App() {
   }
 
   if (currentView === 'phi' && user) {
-    return <PHIDashboard user={user} onLogout={handleLogout} />;
+    return <PHIDashboard 
+      user={user} 
+      onLogout={handleLogout}
+      onNavigateCityVisit={handleNavigateCityVisit}
+      onNavigateAccessControl={handleNavigateAccessControl}
+      onNavigateAlerts={handleNavigateAlerts}
+      onNavigateComplianceReports={handleNavigateComplianceReports}
+    />;
+  }
+
+  if (currentView === 'phi-city-visit' && user) {
+    return <CityVisitTimeTablePage onBack={handleBackToPHI} />;
+  }
+
+  if (currentView === 'phi-access-control' && user) {
+    return <AccessControlPage onBack={handleBackToPHI} />;
+  }
+
+  if (currentView === 'phi-alerts' && user) {
+    return <PHIAlertsPage onBack={handleBackToPHI} />;
+  }
+
+  if (currentView === 'phi-compliance' && user) {
+    return <ComplianceReportsPage onBack={handleBackToPHI} />;
   }
 
   if (currentView === 'hospital' && user) {
@@ -260,6 +311,7 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         html { scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #040d1a; }

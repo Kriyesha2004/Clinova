@@ -1,18 +1,49 @@
 import React, { useState } from 'react';
 import { LogOut, Shield, FileText, AlertCircle, Lock } from 'lucide-react';
+import CityVisitTimeTable from './components/CityVisitTimeTable';
+import AccessControl from './components/AccessControl';
+import PHIAlerts from './components/PHIAlerts';
+import ComplianceReports from './components/ComplianceReports';
 
 interface PHIDashboardProps {
   user: { id: string; name: string; email: string };
   onLogout?: () => void;
+  onNavigateCityVisit?: () => void;
+  onNavigateAccessControl?: () => void;
+  onNavigateAlerts?: () => void;
+  onNavigateComplianceReports?: () => void;
 }
 
-export default function PHIDashboard({ user, onLogout }: PHIDashboardProps) {
+export default function PHIDashboard({ 
+  user, 
+  onLogout,
+  onNavigateCityVisit,
+  onNavigateAccessControl,
+  onNavigateAlerts,
+  onNavigateComplianceReports
+}: PHIDashboardProps) {
   const [stats] = useState({
     totalRecords: 8500,
     encryptedFiles: 8500,
     accessRequests: 45,
     complianceRate: 99.8,
   });
+
+  const handleCityVisitTimeTable = () => {
+    onNavigateCityVisit?.();
+  };
+
+  const handleAccessControl = () => {
+    onNavigateAccessControl?.();
+  };
+
+  const handleAlerts = () => {
+    onNavigateAlerts?.();
+  };
+
+  const handleComplianceReports = () => {
+    onNavigateComplianceReports?.();
+  };
 
   return (
     <div style={styles.container}>
@@ -80,22 +111,10 @@ export default function PHIDashboard({ user, onLogout }: PHIDashboardProps) {
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Security & Compliance</h2>
           <div style={styles.actionGrid}>
-            <button style={styles.actionBtn}>
-              <Shield size={20} />
-              <span>Data Protection</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <Lock size={20} />
-              <span>Access Control</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <FileText size={20} />
-              <span>Audit Logs</span>
-            </button>
-            <button style={styles.actionBtn}>
-              <AlertCircle size={20} />
-              <span>Compliance Reports</span>
-            </button>
+            <CityVisitTimeTable styles={styles} onClick={handleCityVisitTimeTable} />
+            <AccessControl styles={styles} onClick={handleAccessControl} />
+            <PHIAlerts styles={styles} onClick={handleAlerts} />
+            <ComplianceReports styles={styles} onClick={handleComplianceReports} />
           </div>
         </div>
 
