@@ -14,7 +14,7 @@ export const alertService = {
   },
 
   // Get alerts by level (CRITICAL, WARNING, INFO)
-  getAlertsByLevel: async (level) => {
+  getAlertsByLevel: async (level: string) => {
     try {
       const response = await fetch(`${API_URL}/filter/level/${level}`);
       if (!response.ok) throw new Error('Failed to fetch alerts');
@@ -26,7 +26,7 @@ export const alertService = {
   },
 
   // Send alert from MOH
-  sendAlert: async (alertData) => {
+  sendAlert: async (alertData: any) => {
     try {
       const response = await fetch(`${API_URL}/send`, {
         method: 'POST',
@@ -44,7 +44,7 @@ export const alertService = {
   },
 
   // Mark alert as read
-  markAsRead: async (alertId, userId) => {
+  markAsRead: async (alertId: string, userId: string) => {
     try {
       const response = await fetch(`${API_URL}/${alertId}/read`, {
         method: 'PATCH',
@@ -62,7 +62,7 @@ export const alertService = {
   },
 
   // Delete alert
-  deleteAlert: async (alertId) => {
+  deleteAlert: async (alertId: string) => {
     try {
       const response = await fetch(`${API_URL}/${alertId}`, {
         method: 'DELETE',

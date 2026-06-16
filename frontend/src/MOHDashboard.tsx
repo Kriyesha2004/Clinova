@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { LogOut, BarChart3, Users, AlertCircle, Mail, ArrowLeft } from 'lucide-react';
+import { LogOut, BarChart3, Users, AlertCircle, ArrowLeft, Calendar } from 'lucide-react';
 import AIAnalytics from './AIAnalytics';
 import ViewReports from './ViewReports';
 import MohAlerts from './MohAlerts';
 import MessagesList from './components/MessagesList';
+import PHIWeeklyReportsPage from './pages/PHIWeeklyReportsPage';
 
 interface MOHDashboardProps {
   user: { id: string; name: string; email: string };
@@ -11,7 +12,7 @@ interface MOHDashboardProps {
 }
 
 export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
-  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts' | 'messages'>('dashboard');
+  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts' | 'messages' | 'phi-reports'>('dashboard');
   
   const [stats] = useState({
     totalHealthCenters: 145,
@@ -35,9 +36,9 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
     setCurrentSubView('alerts');
   };
 
-  const handleMessages = () => {
-    console.log('Navigating to Messages');
-    setCurrentSubView('messages');
+  const handleWeeklyReports = () => {
+    console.log('Navigating to Weekly Reports');
+    setCurrentSubView('phi-reports');
   };
 
   const handleBackToDashboard = () => {
@@ -140,6 +141,14 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
     );
   }
 
+  if (currentSubView === 'phi-reports') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <PHIWeeklyReportsPage onBack={handleBackToDashboard} />
+      </div>
+    );
+  }
+
   // Main dashboard view
   return (
     <div style={styles.container}>
@@ -210,6 +219,10 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
             <AIAnalytics onClick={handleAIAnalytics} />
             <ViewReports onClick={handleViewReports} />
             <MohAlerts onClick={handleAlerts} />
+            <button type="button" onClick={handleWeeklyReports} style={styles.actionBtn}>
+              <Calendar size={24} color="#00e5c3" />
+              <span>PHI Weekly Reports</span>
+            </button>
           </div>
         </div>
       </main>

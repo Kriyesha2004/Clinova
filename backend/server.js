@@ -10,7 +10,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Allows Express to parse incoming JSON data
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -30,6 +31,9 @@ app.use('/api/alerts', require('./routes/alerts'));
 
 // Import Messages Routes
 app.use('/api/messages', require('./routes/messages'));
+
+// Import City Visits Routes
+app.use('/api/city-visits', require('./routes/cityVisits'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
