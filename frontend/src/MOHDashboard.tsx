@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { LogOut, BarChart3, Users, AlertCircle, ArrowLeft } from 'lucide-react';
+import { LogOut, BarChart3, Users, AlertCircle, Mail, ArrowLeft } from 'lucide-react';
 import AIAnalytics from './AIAnalytics';
 import ViewReports from './ViewReports';
 import MohAlerts from './MohAlerts';
+import MessagesList from './components/MessagesList';
 
 interface MOHDashboardProps {
   user: { id: string; name: string; email: string };
@@ -10,7 +11,7 @@ interface MOHDashboardProps {
 }
 
 export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
-  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts'>('dashboard');
+  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts' | 'messages'>('dashboard');
   
   const [stats] = useState({
     totalHealthCenters: 145,
@@ -32,6 +33,11 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
   const handleAlerts = () => {
     console.log('Navigating to Alerts');
     setCurrentSubView('alerts');
+  };
+
+  const handleMessages = () => {
+    console.log('Navigating to Messages');
+    setCurrentSubView('messages');
   };
 
   const handleBackToDashboard = () => {
@@ -122,6 +128,14 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
           <ArrowLeft size={16} /> Back to Dashboard
         </button>
         <MohAlerts isFullPage={true} />
+      </div>
+    );
+  }
+
+  if (currentSubView === 'messages') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <MessagesList onBack={handleBackToDashboard} />
       </div>
     );
   }

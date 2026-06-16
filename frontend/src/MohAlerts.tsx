@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { AlertCircle, Send, CheckCircle } from 'lucide-react';
+import { AlertCircle, Send, CheckCircle, MessageSquare } from 'lucide-react';
 import { alertService } from './services/alertService';
+
+// Assuming ChatBox is imported from its respective file path
+// Replace './ChatBox' with your actual path if different
+import ChatBox from './components/ChatBox'; 
 
 interface AlertsProps {
   onClick?: () => void;
@@ -17,6 +21,9 @@ export default function Alerts({ onClick, isFullPage = false }: AlertsProps) {
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // State to manage the chat collapse/expand visibility
+  const [showChat, setShowChat] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -152,6 +159,26 @@ export default function Alerts({ onClick, isFullPage = false }: AlertsProps) {
               {sending ? 'Sending...' : 'Send Alert to PHI'}
             </button>
           </form>
+
+          {/* Integrated Chat Section */}
+          <div style={styles.chatSection}>
+            <button
+              style={styles.chatToggleBtn}
+              onClick={() => setShowChat(!showChat)}
+            >
+              <MessageSquare size={20} />
+              {showChat ? 'Hide Chat' : 'Send Message to PHI'}
+            </button>
+            {showChat && (
+              <ChatBox
+                onClose={() => setShowChat(false)}
+                userName="MO Officer"
+                userId="moh-001"
+                senderRole="MOH"
+              />
+            )}
+          </div>
+
         </div>
       </div>
     );
@@ -281,21 +308,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '20px',
     fontSize: '14px',
   },
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
-    backgroundColor: 'rgba(10, 25, 41, 0.5)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '12px',
-    gap: '20px',
-  },
-  placeholder: {
-    fontSize: '16px',
-    color: '#64748b',
-  },
   actionBtn: {
     display: 'flex',
     flexDirection: 'column',
@@ -311,4 +323,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '500',
     transition: 'all 0.3s ease',
   },
+  
+  /* Styled chat additions to fit your current aesthetics */
+  chatSection: {
+    marginTop: '30px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    paddingTop: '20px',
+  },
+  chatToggleBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 16px',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    border: '1px solid rgba(59, 130, 246, 0.3)',
+    borderRadius: '8px',
+    color: '#3b82f6',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    marginBottom: '15px',
+  }
 };

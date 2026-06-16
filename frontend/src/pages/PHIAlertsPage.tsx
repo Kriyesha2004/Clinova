@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, AlertCircle, Loader } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader, MessageSquare } from 'lucide-react';
 import { alertService } from '../services/alertService';
+import ChatBox from '../components/ChatBox';
 
 interface PHIAlertsPageProps {
   onBack: () => void;
@@ -10,6 +11,7 @@ export default function PHIAlertsPage({ onBack }: PHIAlertsPageProps) {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -105,6 +107,25 @@ export default function PHIAlertsPage({ onBack }: PHIAlertsPageProps) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Chat Section */}
+            <div style={styles.chatSection}>
+              <button
+                style={styles.chatToggleBtn}
+                onClick={() => setShowChat(!showChat)}
+              >
+                <MessageSquare size={20} />
+                {showChat ? 'Hide Chat' : 'Send Message to MOH'}
+              </button>
+              {showChat && (
+                <ChatBox
+                  onClose={() => setShowChat(false)}
+                  userName="PHI Officer"
+                  userId="phi-001"
+                  senderRole="PHI"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -249,5 +270,24 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#94a3b8',
     textAlign: 'center',
     padding: '24px',
+  },
+  chatSection: {
+    marginTop: '30px',
+    paddingTop: '30px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  chatToggleBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+    border: '1px solid rgba(14, 165, 233, 0.3)',
+    borderRadius: '8px',
+    color: '#0ea5e9',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
   },
 };
