@@ -22,6 +22,7 @@ import CityVisitTimeTablePage from './pages/CityVisitTimeTablePage';
 import AccessControlPage from './pages/AccessControlPage';
 import PHIAlertsPage from './pages/PHIAlertsPage';
 import ComplianceReportsPage from './pages/ComplianceReportsPage';
+import { complaintService } from './services/complaintService';
 
 /* =========================
    SCROLL REVEAL HOOK
@@ -239,21 +240,31 @@ export default function App() {
      FORM SUBMIT
   ========================= */
 
-  const handleSubmit = (
+  const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
-    setSubmitted(true);
+    try {
+      await complaintService.sendComplaint({
+        name: formState.name,
+        email: formState.email,
+        message: formState.message
+      });
+      setSubmitted(true);
 
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 3000);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
 
-    setFormState({
-      name: "",
-      email: "",
-      message: "",
-    });
+      setFormState({
+        name: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   const navLinks: string[] = [

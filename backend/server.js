@@ -35,6 +35,9 @@ app.use('/api/messages', require('./routes/messages'));
 // Import City Visits Routes
 app.use('/api/city-visits', require('./routes/cityVisits'));
 
+// Import Complaints Routes
+app.use('/api/complaints', require('./routes/complaints'));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
