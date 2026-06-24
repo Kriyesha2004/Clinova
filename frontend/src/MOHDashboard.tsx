@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { LogOut, BarChart3, Users, AlertCircle, ArrowLeft, Calendar } from 'lucide-react';
+import { LogOut, BarChart3, Users, AlertCircle, ArrowLeft, Calendar, Droplet, Package } from 'lucide-react';
 import AIAnalytics from './AIAnalytics';
 import ViewReports from './ViewReports';
+import BloodInventoryPage from './pages/hospital/BloodInventoryPage';
+import WardSuppliesPage from './pages/hospital/WardSuppliesPage';
 import MohAlerts from './MohAlerts';
 import MessagesList from './components/MessagesList';
 import PHIWeeklyReportsPage from './pages/PHIWeeklyReportsPage';
@@ -12,7 +14,7 @@ interface MOHDashboardProps {
 }
 
 export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
-  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts' | 'messages' | 'phi-reports'>('dashboard');
+  const [currentSubView, setCurrentSubView] = useState<'dashboard' | 'ai-analytics' | 'view-reports' | 'alerts' | 'messages' | 'phi-reports' | 'blood-inventory-view' | 'ward-supplies-view'>('dashboard');
   
   const [stats] = useState({
     totalHealthCenters: 145,
@@ -149,6 +151,22 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
     );
   }
 
+  if (currentSubView === 'blood-inventory-view') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <BloodInventoryPage onBack={handleBackToDashboard} isReadOnly={true} />
+      </div>
+    );
+  }
+
+  if (currentSubView === 'ward-supplies-view') {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#030d16' }}>
+        <WardSuppliesPage onBack={handleBackToDashboard} isReadOnly={true} />
+      </div>
+    );
+  }
+
   // Main dashboard view
   return (
     <div style={styles.container}>
@@ -222,6 +240,14 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
             <button type="button" onClick={handleWeeklyReports} style={styles.actionBtn}>
               <Calendar size={24} color="#00e5c3" />
               <span>PHI Weekly Reports</span>
+            </button>
+            <button type="button" onClick={() => setCurrentSubView('blood-inventory-view')} style={styles.actionBtn}>
+              <Droplet size={24} color="#ef4444" fill="#ef4444" />
+              <span>Hospital Blood Reserves</span>
+            </button>
+            <button type="button" onClick={() => setCurrentSubView('ward-supplies-view')} style={styles.actionBtn}>
+              <Package size={24} color="#a855f7" />
+              <span>Hospital Ward Supplies</span>
             </button>
           </div>
         </div>

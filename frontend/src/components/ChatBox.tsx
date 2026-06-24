@@ -4,7 +4,7 @@ import { messageService } from '../services/messageService';
 
 interface Message {
   _id: string;
-  sender: 'PHI' | 'MOH';
+  sender: 'PHI' | 'MOH' | 'hospital';
   senderName: string;
   message: string;
   timestamp: string;
@@ -90,7 +90,7 @@ export default function ChatBox({ onClose, userName, userId, senderRole = 'PHI' 
       <div style={styles.header}>
         <div style={styles.headerLeft}>
           <div style={styles.onlineDot} />
-          <h3 style={styles.title}>Chat with {senderRole === 'MOH' ? 'PHI' : 'MOH'}</h3>
+          <h3 style={styles.title}>Inter-departmental Chat</h3>
         </div>
         {onClose && (
           <button style={styles.closeBtn} onClick={onClose}>
