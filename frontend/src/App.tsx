@@ -22,6 +22,7 @@ import CityVisitTimeTablePage from './pages/CityVisitTimeTablePage';
 import AccessControlPage from './pages/AccessControlPage';
 import PHIAlertsPage from './pages/PHIAlertsPage';
 import ComplianceReportsPage from './pages/ComplianceReportsPage';
+import DengueResourcePage from './pages/DengueResourcePage';
 import { complaintService } from './services/complaintService';
 
 /* =========================
@@ -161,7 +162,7 @@ function StatCounter({
 ========================= */
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts' | 'phi-city-visit' | 'phi-access-control' | 'phi-alerts' | 'phi-compliance'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'moh' | 'phi' | 'hospital' | 'ai-analytics' | 'view-reports' | 'alerts' | 'phi-city-visit' | 'phi-access-control' | 'phi-alerts' | 'phi-compliance' | 'demo'>('home');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
@@ -314,6 +315,10 @@ export default function App() {
 
   if (currentView === 'hospital' && user) {
     return <HospitalDashboard user={user} onLogout={handleLogout} />;
+  }
+
+  if (currentView === 'demo') {
+    return <DengueResourcePage onBack={() => setCurrentView('home')} />;
   }
 
   return (
@@ -535,7 +540,7 @@ export default function App() {
               <button className="btn-primary">
                 Explore Portal <ArrowRight size={16} />
               </button>
-              <button className="btn-outline">
+              <button className="btn-outline" onClick={() => setCurrentView('demo')}>
                 Watch Demo
               </button>
             </div>
