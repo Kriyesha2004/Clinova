@@ -43,7 +43,41 @@ mongoose.connect(process.env.MONGO_URI)
             image: ""
           }
         ]);
-        console.log('✅ Seeding completed.');
+        console.log('✅ Seeding dengue resources completed.');
+      }
+
+      // Seed BloodStock if empty
+      const BloodStock = require('./models/BloodStock');
+      const bloodCount = await BloodStock.countDocuments();
+      if (bloodCount === 0) {
+        console.log('🌱 Seeding initial blood stock data...');
+        await BloodStock.insertMany([
+          { group: 'A+', units: 45, max: 60 },
+          { group: 'A-', units: 12, max: 20 },
+          { group: 'B+', units: 38, max: 50 },
+          { group: 'B-', units: 8, max: 20 },
+          { group: 'AB+', units: 25, max: 30 },
+          { group: 'AB-', units: 4, max: 10 },
+          { group: 'O+', units: 55, max: 70 },
+          { group: 'O-', units: 18, max: 30 },
+        ]);
+        console.log('✅ Seeding blood stock completed.');
+      }
+
+      // Seed WardSupply if empty
+      const WardSupply = require('./models/WardSupply');
+      const supplyCount = await WardSupply.countDocuments();
+      if (supplyCount === 0) {
+        console.log('🌱 Seeding initial ward supplies checklist...');
+        await WardSupply.insertMany([
+          { name: 'Insecticide-Treated Bed Nets', category: 'Preventative', stock: 45, minTarget: 50 },
+          { name: 'Dengue NS1 Antigen Rapid Test Kits', category: 'Diagnostic', stock: 120, minTarget: 100 },
+          { name: 'IV Fluids (Saline/Ringer Lactate)', category: 'Therapeutic', stock: 35, minTarget: 80 },
+          { name: 'Paracetamol Tabs (500mg)', category: 'Therapeutic', stock: 1400, minTarget: 1000 },
+          { name: 'Dengue IgM/IgG ELISA Kits', category: 'Diagnostic', stock: 15, minTarget: 30 },
+          { name: 'Insecticide Hand Spray Canisters', category: 'Preventative', stock: 8, minTarget: 15 },
+        ]);
+        console.log('✅ Seeding ward supplies completed.');
       }
     } catch (err) {
       console.error('❌ Error seeding database:', err);
@@ -73,6 +107,9 @@ app.use('/api/complaints', require('./routes/complaints'));
 
 // Import Dengue Content Routes
 app.use('/api/dengue-content', require('./routes/dengueContent'));
+
+// Import Hospital Routes
+app.use('/api/hospital', require('./routes/hospital'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

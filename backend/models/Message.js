@@ -4,7 +4,7 @@ const MessageSchema = new mongoose.Schema(
   {
     sender: {
       type: String,
-      enum: ['PHI', 'MOH'],
+      enum: ['PHI', 'MOH', 'hospital'],
       required: true,
     },
     senderName: {
