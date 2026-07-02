@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Minus, ClipboardList, Loader } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, ClipboardList, Loader, X } from 'lucide-react';
 import { hospitalService } from '../../services/hospitalService';
 import type { WardSupplyItem } from '../../services/hospitalService';
 
@@ -13,6 +13,48 @@ export default function WardSuppliesPage({ onBack, isReadOnly = false }: WardSup
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [requestedId, setRequestedId] = useState<string | null>(null);
+
+  // Form State
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [newSupplyName, setNewSupplyName] = useState<string>('');
+  const [newSupplyCategory, setNewSupplyCategory] = useState<'Diagnostic' | 'Therapeutic' | 'Preventative' | 'Equipment'>('Diagnostic');
+  const [newSupplyStock, setNewSupplyStock] = useState<number>(0);
+  const [newSupplyMinTarget, setNewSupplyMinTarget] = useState<number>(10);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [adding, setAdding] = useState<boolean>(false);
+
+  const handleAddSupply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isReadOnly || adding) return;
+
+    if (!newSupplyName.trim()) {
+      setAddError('Supply name is required');
+      return;
+    }
+
+    try {
+      setAdding(true);
+      setAddError(null);
+      const newSupply = await hospitalService.addWardSupply({
+        name: newSupplyName.trim(),
+        category: newSupplyCategory,
+        stock: newSupplyStock,
+        minTarget: newSupplyMinTarget
+      });
+      setSupplies(prev => [...prev, newSupply]);
+      
+      // Reset form
+      setNewSupplyName('');
+      setNewSupplyCategory('Diagnostic');
+      setNewSupplyStock(0);
+      setNewSupplyMinTarget(10);
+      setShowAddModal(false);
+    } catch (err: any) {
+      setAddError(err.message || 'Failed to add new supply material');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   useEffect(() => {
     fetchSupplies();
@@ -62,7 +104,13 @@ export default function WardSuppliesPage({ onBack, isReadOnly = false }: WardSup
           <ArrowLeft size={20} />
           Dashboard
         </button>
-        <h1 style={styles.title}>Dengue Ward Supplies {isReadOnly ? '(View Only)' : 'Management'}</h1>
+        <h1 style={{ ...styles.title, flex: 1 }}>Dengue Ward Supplies {isReadOnly ? '(View Only)' : 'Management'}</h1>
+        {!isReadOnly && (
+          <button style={styles.addBtn} onClick={() => setShowAddModal(true)}>
+            <Plus size={18} />
+            Add Supply
+          </button>
+        )}
       </header>
 
       <main style={styles.main}>
@@ -148,6 +196,81 @@ export default function WardSuppliesPage({ onBack, isReadOnly = false }: WardSup
           </div>
         )}
       </main>
+
+      {showAddModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Add New Supply Material</h3>
+              <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            {addError && <div style={styles.modalError}>{addError}</div>}
+            
+            <form onSubmit={handleAddSupply} style={styles.modalForm}>
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Material Name</label>
+                <input 
+                  type="text" 
+                  value={newSupplyName} 
+                  onChange={(e) => setNewSupplyName(e.target.value)} 
+                  placeholder="e.g. Normal Saline 500ml"
+                  required
+                  style={styles.formInput}
+                />
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.formLabel}>Category</label>
+                <select 
+                  value={newSupplyCategory} 
+                  onChange={(e) => setNewSupplyCategory(e.target.value as any)}
+                  style={styles.formSelect}
+                >
+                  <option value="Diagnostic">Diagnostic</option>
+                  <option value="Therapeutic">Therapeutic</option>
+                  <option value="Preventative">Preventative</option>
+                  <option value="Equipment">Equipment</option>
+                </select>
+              </div>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Initial Stock</label>
+                  <input 
+                    type="number" 
+                    min={0}
+                    value={newSupplyStock} 
+                    onChange={(e) => setNewSupplyStock(Math.max(0, parseInt(e.target.value) || 0))} 
+                    style={styles.formInput}
+                  />
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.formLabel}>Min Target Threshold</label>
+                  <input 
+                    type="number" 
+                    min={1}
+                    value={newSupplyMinTarget} 
+                    onChange={(e) => setNewSupplyMinTarget(Math.max(1, parseInt(e.target.value) || 1))} 
+                    style={styles.formInput}
+                  />
+                </div>
+              </div>
+
+              <div style={styles.modalActions}>
+                <button type="button" style={styles.cancelBtn} onClick={() => setShowAddModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={adding} style={styles.submitBtn}>
+                  {adding ? 'Adding...' : 'Add Supply'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -369,5 +492,116 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '12px',
     fontWeight: '600',
     cursor: 'pointer',
+  },
+  addBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 16px',
+    backgroundColor: '#00e5c3',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#030d16',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(3, 13, 22, 0.85)',
+    backdropFilter: 'blur(8px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: '#0a1929',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '16px',
+    padding: '30px',
+    width: '100%',
+    maxWidth: '480px',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: '18px',
+    fontWeight: '700',
+    margin: 0,
+    color: '#ffffff',
+  },
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#64748b',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '4px',
+    transition: 'color 0.2s ease',
+  },
+  modalError: {
+    padding: '10px 14px',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    border: '1px solid rgba(239, 68, 68, 0.2)',
+    borderRadius: '6px',
+    color: '#f87171',
+    fontSize: '13px',
+  },
+  modalForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  modalActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    marginTop: '10px',
+  },
+  cancelBtn: {
+    padding: '10px 18px',
+    backgroundColor: 'transparent',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '8px',
+    color: '#94a3b8',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  formInput: {
+    padding: '10px 14px',
+    backgroundColor: '#030d16',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '6px',
+    color: '#ffffff',
+    fontSize: '14px',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+  },
+  formSelect: {
+    padding: '10px 14px',
+    backgroundColor: '#030d16',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '6px',
+    color: '#ffffff',
+    fontSize: '14px',
+    outline: 'none',
   },
 };

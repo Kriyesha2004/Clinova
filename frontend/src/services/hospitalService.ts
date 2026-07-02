@@ -131,4 +131,25 @@ export const hospitalService = {
       throw error;
     }
   },
+
+  addWardSupply: async (data: Omit<WardSupplyItem, '_id'>): Promise<WardSupplyItem> => {
+    try {
+      const response = await fetch(`${API_URL}/ward-supplies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errJson = await response.json();
+        throw new Error(errJson.message || 'Failed to add ward supply');
+      }
+      const resJson = await response.json();
+      return resJson.data;
+    } catch (error) {
+      console.error('Error adding ward supply:', error);
+      throw error;
+    }
+  },
 };

@@ -136,4 +136,26 @@ router.post('/ward-supplies/replenish', async (req, res) => {
   }
 });
 
+// POST create a new ward supply
+router.post('/ward-supplies', async (req, res) => {
+  const { name, category, stock, minTarget } = req.body;
+
+  if (!name || !category || stock === undefined || minTarget === undefined) {
+    return res.status(400).json({ message: 'Name, category, stock, and minTarget are required' });
+  }
+
+  try {
+    const newSupply = new WardSupply({
+      name,
+      category,
+      stock,
+      minTarget
+    });
+    const saved = await newSupply.save();
+    res.status(201).json({ message: 'Supply item created successfully', data: saved });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
