@@ -111,6 +111,9 @@ app.use('/api/dengue-content', require('./routes/dengueContent'));
 // Import Hospital Routes
 app.use('/api/hospital', require('./routes/hospital'));
 
+// Import AI Analytics Routes
+app.use('/api/ai', require('./routes/ai'));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
