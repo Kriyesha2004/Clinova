@@ -2,12 +2,12 @@
 echo Starting Clinova Full Stack...
 
 echo Starting Backend...
-start "Clinova Backend" cmd /k "cd backend && npm run dev"
+start "Clinova Backend" cmd /k "cd backend && if not exist node_modules npm install && npm run dev"
 
 echo Starting Frontend...
-start "Clinova Frontend" cmd /k "cd frontend && npm run dev"
+start "Clinova Frontend" cmd /k "cd frontend && if not exist node_modules npm install && npm run dev"
 
 echo Starting AI Service...
-start "Clinova AI Service" cmd /k "cd ai_service && call venv\Scripts\activate.bat && python app.py"
+start "Clinova AI Service" cmd /k "cd ai_service && if not exist venv (python -m venv venv && call venv\Scripts\activate.bat && pip install -r requirements.txt) else (call venv\Scripts\activate.bat) && python app.py"
 
 echo All services are starting up in new windows!
