@@ -36,21 +36,18 @@ Make sure you have the following installed on your system:
 - **Python** (v3.10 or higher)
 - **Git**
 
-### 1. Installation
+### 1. Installation & Running (The Easy Way ⭐)
 
-First, install the dependencies for the frontend and backend. 
-*(Note: The AI service dependencies are handled automatically by the startup script).*
+We have included a convenient batch script that makes setup effortless! You **do not** need to manually install dependencies or create virtual environments.
 
-**Install Backend Dependencies:**
+Simply double-click the **`start_all.bat`** file located in the root of this project.
+
+- The script is smart: if it's your first time running the project, it will automatically download and install all Node.js and Python dependencies for you!
+- It will instantly open three terminal windows and start the Frontend, Backend, and AI Service simultaneously.
+
+*Alternatively, you can run it from your IDE terminal:*
 ```bash
-cd backend
-npm install
-```
-
-**Install Frontend Dependencies:**
-```bash
-cd ../frontend
-npm install
+.\start_all.bat
 ```
 
 ### 2. Environment Setup
@@ -63,18 +60,7 @@ JWT_SECRET=super_secret_clinova_key_123
 AI_SERVICE_URL=http://127.0.0.1:8000
 ```
 
-### 3. Running the Application (The Easy Way)
-
-We have included a convenient batch script that will automatically open three terminal windows and start the Frontend, Backend, and AI Service simultaneously.
-
-Simply double-click the **`start_all.bat`** file located in the root of this project!
-
-*Alternatively, you can run it from the terminal:*
-```bash
-.\start_all.bat
-```
-
-### 4. Running the Application (Manually)
+### 3. Running the Application (Manually)
 
 If you prefer to start the services individually, open three separate terminals and run the following commands:
 
