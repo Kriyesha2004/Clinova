@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const PredictionReport = require('../models/PredictionReport');
 
 router.post('/predict', async (req, res) => {
   try {
@@ -24,6 +25,43 @@ router.post('/predict', async (req, res) => {
   } catch (error) {
     console.error('Error proxying to AI service:', error);
     res.status(500).json({ message: 'Failed to communicate with AI Service', error: error.message });
+  }
+});
+
+// POST /reports
+router.post('/reports', async (req, res) => {
+  try {
+    const report = new PredictionReport(req.body);
+    const saved = await report.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    console.error('Error saving prediction report:', error);
+    res.status(500).json({ message: 'Failed to save prediction report', error: error.message });
+  }
+});
+
+// GET /reports
+router.get('/reports', async (req, res) => {
+  try {
+    const reports = await PredictionReport.find().sort({ date: -1 });
+    res.json(reports);
+  } catch (error) {
+    console.error('Error fetching prediction reports:', error);
+    res.status(500).json({ message: 'Failed to fetch prediction reports', error: error.message });
+  }
+});
+
+// DELETE /reports/:id
+router.delete('/reports/:id', async (req, res) => {
+  try {
+    const deleted = await PredictionReport.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Report not found' });
+    }
+    res.json({ message: 'Report deleted successfully', data: deleted });
+  } catch (error) {
+    console.error('Error deleting prediction report:', error);
+    res.status(500).json({ message: 'Failed to delete prediction report', error: error.message });
   }
 });
 

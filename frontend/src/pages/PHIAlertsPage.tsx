@@ -101,8 +101,26 @@ export default function PHIAlertsPage({ onBack }: PHIAlertsPageProps) {
                       </span>
                     </div>
                     <p style={styles.alertMessage}>{alert.message}</p>
-                    {alert.details?.userId && (
-                      <p style={styles.alertDetails}>User ID: {alert.details.userId}</p>
+                    {alert.details?.action === "AI Prediction Broadcast" ? (
+                      <div style={styles.alertDetailsCard}>
+                        <div style={styles.detailsTitle}>AI EPIDEMIOLOGICAL DIAGNOSTIC REPORT</div>
+                        <div style={styles.detailsGrid}>
+                          <div><strong>Location:</strong> {alert.details.location}</div>
+                          <div><strong>Predictive Risk:</strong> <span style={{ color: alert.details.prediction?.toLowerCase() === 'high' ? '#ef4444' : '#f59e0b', fontWeight: 'bold' }}>{alert.details.prediction?.toUpperCase()}</span></div>
+                          <div><strong>Mean Temp (TEM):</strong> {alert.details.TEM}°C</div>
+                          <div><strong>Humidity (H):</strong> {alert.details.H}%</div>
+                          <div><strong>Rainfall (PP):</strong> {alert.details.PP} mm</div>
+                        </div>
+                        <div style={styles.detailsProtocol}>
+                          <strong>Vector Directives:</strong> {alert.details.recommendation}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {alert.details?.userId && (
+                          <p style={styles.alertDetails}>User ID: {alert.details.userId}</p>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
@@ -289,5 +307,35 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontWeight: '500',
     transition: 'all 0.3s ease',
+  },
+  alertDetailsCard: {
+    marginTop: '12px',
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '8px',
+    padding: '14px',
+    textAlign: 'left' as const,
+  },
+  detailsTitle: {
+    fontSize: '11px',
+    fontWeight: '700',
+    color: '#00e5c3',
+    letterSpacing: '0.04em',
+    marginBottom: '8px',
+  },
+  detailsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '6px 12px',
+    fontSize: '13px',
+    color: '#cbd5e1',
+    marginBottom: '10px',
+  },
+  detailsProtocol: {
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    paddingTop: '8px',
+    fontSize: '12.5px',
+    color: '#cbd5e1',
+    lineHeight: '1.4',
   },
 };

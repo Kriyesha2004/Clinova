@@ -29,9 +29,8 @@ const AlertSchema = new mongoose.Schema(
       ref: 'User',
     },
     details: {
-      userId: String,
-      action: String,
-      location: String,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
   },
   { timestamps: true }
