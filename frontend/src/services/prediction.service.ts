@@ -1,37 +1,12 @@
+import type { PredictionRequestData, PredictionReportData, PredictionReportDoc } from '../models/prediction.model';
+
 const API_URL = 'http://localhost:5000/api/ai';
 
-export interface PredictionRequestData {
-  TEM: number;
-  TMAX: number;
-  Tm: number;
-  SLP: number;
-  H: number;
-  PP: number;
-  VV: number;
-  V: number;
-  VM: number;
-  Week: number;
-}
-
-export interface PredictionReportData extends PredictionRequestData {
-  city: string;
-  prediction: string;
-  risk_level_code: number;
-  probability: number;
-  recommendation: string;
-  createdBy?: string;
-}
-
-export interface PredictionReportDoc extends PredictionReportData {
-  _id: string;
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export const aiService = {
-  // Run prediction
-  predict: async (data: PredictionRequestData) => {
+export const predictionService = {
+  /**
+   * Run outbreak prediction using climate indicators
+   */
+  predict: async (data: PredictionRequestData): Promise<{ prediction: string; risk_level_code: number; probability: number }> => {
     const response = await fetch(`${API_URL}/predict`, {
       method: 'POST',
       headers: {
@@ -41,12 +16,14 @@ export const aiService = {
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error(err.message || 'AI Prediction failed');
+      throw new Error(err.message || 'AI Outbreak prediction failed');
     }
     return await response.json();
   },
 
-  // Save prediction report
+  /**
+   * Save the generated prediction report to the database
+   */
   saveReport: async (reportData: PredictionReportData): Promise<PredictionReportDoc> => {
     const response = await fetch(`${API_URL}/reports`, {
       method: 'POST',
@@ -62,7 +39,9 @@ export const aiService = {
     return await response.json();
   },
 
-  // Get all saved prediction reports
+  /**
+   * Get all saved prediction reports
+   */
   getReports: async (): Promise<PredictionReportDoc[]> => {
     const response = await fetch(`${API_URL}/reports`);
     if (!response.ok) {
@@ -71,7 +50,26 @@ export const aiService = {
     return await response.json();
   },
 
-  // Delete a prediction report
+  /**
+   * Fetch the latest prediction report
+   */
+  getLatestPrediction: async (): Promise<PredictionReportDoc | null> => {
+    const reports = await predictionService.getReports();
+    return reports.length > 0 ? reports[0] : null;
+  },
+
+  /**
+   * Fetch the last 7 prediction reports for analytics charts
+   */
+  getPredictionHistory: async (limit: number = 7): Promise<PredictionReportDoc[]> => {
+    const reports = await predictionService.getReports();
+    // Return the reports in chronological order (oldest to newest) for chart display
+    return reports.slice(0, limit).reverse();
+  },
+
+  /**
+   * Delete a prediction report
+   */
   deleteReport: async (id: string): Promise<{ message: string }> => {
     const response = await fetch(`${API_URL}/reports/${id}`, {
       method: 'DELETE',

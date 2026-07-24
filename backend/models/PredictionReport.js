@@ -24,6 +24,10 @@ const PredictionReportSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    probability: {
+      type: Number,
+      default: 0,
+    },
     recommendation: {
       type: String,
       required: true,

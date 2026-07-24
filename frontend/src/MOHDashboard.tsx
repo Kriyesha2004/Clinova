@@ -7,6 +7,8 @@ import WardSuppliesPage from './pages/hospital/WardSuppliesPage';
 import MohAlerts from './MohAlerts';
 import MessagesList from './components/MessagesList';
 import PHIWeeklyReportsPage from './pages/PHIWeeklyReportsPage';
+import DashboardContainer from './components/dashboard/DashboardContainer';
+
 
 interface MOHDashboardProps {
   user: { id: string; name: string; email: string };
@@ -251,6 +253,9 @@ export default function MOHDashboard({ user, onLogout }: MOHDashboardProps) {
             </button>
           </div>
         </div>
+
+        {/* Colombo District Risk Map & Analytics Summary Section */}
+        <DashboardContainer />
       </main>
     </div>
   );

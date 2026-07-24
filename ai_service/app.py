@@ -68,6 +68,8 @@ def predict_dengue_risk(req: PredictionRequest):
         
         # Predict
         prediction_code = model.predict(input_data)[0]
+        probabilities = model.predict_proba(input_data)[0]
+        probability = float(probabilities[prediction_code] * 100)
         
         # Inverse transform to get human readable label (e.g. 'High', 'Medium', 'Low')
         prediction_label = label_encoder.inverse_transform([prediction_code])[0]
@@ -75,12 +77,13 @@ def predict_dengue_risk(req: PredictionRequest):
         # Log to the console so the user can see it working!
         print(f"--- New Prediction Request ---")
         print(f"Received Features: {req.model_dump()}")
-        print(f"Predicted Risk Level: {prediction_label.upper()} (Code: {int(prediction_code)})")
+        print(f"Predicted Risk Level: {prediction_label.upper()} (Code: {int(prediction_code)}), Confidence: {probability:.1f}%")
         print(f"------------------------------")
 
         return {
             "prediction": prediction_label,
-            "risk_level_code": int(prediction_code)
+            "risk_level_code": int(prediction_code),
+            "probability": round(probability, 1)
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
